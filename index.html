@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Zurich Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            padding: 12px;
+            max-width: 220px;
+        }
+
+        .controls h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .layer-toggle {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .layer-toggle input {
+            margin-right: 8px;
+        }
+
+        .layer-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .icon-hiking { background: #2d5a27; color: white; }
+        .icon-restaurant { background: #e74c3c; color: white; }
+        .icon-transport { background: #3498db; color: white; }
+        .icon-grocery { background: #f39c12; color: white; }
+        .icon-activity { background: #9b59b6; color: white; }
+
+        .gpx-loader {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .gpx-loader label {
+            font-size: 12px;
+            color: #666;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .gpx-loader input[type="file"] {
+            font-size: 11px;
+            width: 100%;
+        }
+
+        .custom-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            font-size: 14px;
+        }
+
+        .leaflet-popup-content h4 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .leaflet-popup-content p {
+            margin: 4px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .leaflet-popup-content .category-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .leaflet-popup-content .rating {
+            color: #f39c12;
+        }
+
+        .leaflet-popup-content .link {
+            display: inline-block;
+            margin-top: 8px;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .leaflet-popup-content .link:hover {
+            text-decoration: underline;
+        }
+
+        .search-box {
+            margin-bottom: 10px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .place-count {
+            font-size: 11px;
+            color: #999;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                top: auto;
+                bottom: 20px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="controls">
+        <h3 id="map-title">📍 My Zurich Map</h3>
+        
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Search places...">
+        </div>
+        
+        <label class="layer-toggle">
+            <input type="checkbox" data-category="hiking" checked>
+            <span class="layer-icon icon-hiking">🥾</span>
+            Hiking Trails
+        </label>
+        
+        <label class="layer-toggle">
+            <input type="checkbox" data-category="restaurant" checked>
+            <span class="layer-icon icon-restaurant">🍽️</span>
+            Restaurants
+        </label>
+        
+        <label class="layer-toggle">
+            <input type="checkbox" data-category="transport" checked>
+            <span class="layer-icon icon-transport">🚂</span>
+            Transport
+        </label>
+        
+        <label class="layer-toggle">
+            <input type="checkbox" data-category="grocery" checked>
+            <span class="layer-icon icon-grocery">🛒</span>
+            Grocery
+        </label>
+        
+        <label class="layer-toggle">
+            <input type="checkbox" data-category="activity" checked>
+            <span class="layer-icon icon-activity">⭐</span>
+            Things to Do
+        </label>
+        
+        <div class="gpx-loader">
+            <label>Import GPX file:</label>
+            <input type="file" id="gpx-input" accept=".gpx">
+        </div>
+        
+        <div class="place-count" id="place-count"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        
+        const DATA_FILE = 'data/places.json';
+        const TRAILS_FOLDER = 'data/trails/';
+        
+        const CATEGORIES = {
+            hiking:     { color: '#2d5a27', icon: '🥾', name: 'Hiking' },
+            restaurant: { color: '#e74c3c', icon: '🍽️', name: 'Restaurant' },
+            transport:  { color: '#3498db', icon: '🚂', name: 'Transport' },
+            grocery:    { color: '#f39c12', icon: '🛒', name: 'Grocery' },
+            activity:   { color: '#9b59b6', icon: '⭐', name: 'Things to Do' }
+        };
+
+        // ============================================
+        // APP STATE
+        // ============================================
+        
+        let map;
+        let allPlaces = [];
+        let allMarkers = [];
+        
+        const layers = {
+            hiking: null,
+            restaurant: null,
+            transport: null,
+            grocery: null,
+            activity: null,
+            gpxTracks: null
+        };
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        async function init() {
+            try {
+                const response = await fetch(DATA_FILE);
+                const data = await response.json();
+                
+                // Set up map with config from JSON
+                const center = data.meta?.center || [47.3769, 8.5417];
+                const zoom = data.meta?.zoom || 13;
+                const title = data.meta?.title || 'My Map';
+                
+                document.getElementById('map-title').textContent = '📍 ' + title;
+                document.title = title;
+                
+                map = L.map('map').setView(center, zoom);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+                
+                // Initialize layer groups
+                Object.keys(layers).forEach(key => {
+                    layers[key] = L.layerGroup().addTo(map);
+                });
+                
+                // Load places
+                allPlaces = data.places || [];
+                allPlaces.forEach(place => {
+                    const marker = createMarker(place);
+                    marker.placeData = place;
+                    allMarkers.push(marker);
+                    marker.addTo(layers[place.category]);
+                    
+                    // Load associated GPX file if specified
+                    if (place.gpxFile) {
+                        loadGpxFile(TRAILS_FOLDER + place.gpxFile);
+                    }
+                });
+                
+                updatePlaceCount();
+                setupEventListeners();
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback: initialize empty map centered on Zurich
+                map = L.map('map').setView([47.3769, 8.5417], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                Object.keys(layers).forEach(key => {
+                    layers[key] = L.layerGroup().addTo(map);
+                });
+                
+                setupEventListeners();
+            }
+        }
+
+        // ============================================
+        // MARKER CREATION
+        // ============================================
+        
+        function createMarker(place) {
+            const cat = CATEGORIES[place.category] || CATEGORIES.activity;
+            
+            const markerHtml = `
+                <div class="custom-marker" style="
+                    background: ${cat.color};
+                    width: 32px;
+                    height: 32px;
+                ">${cat.icon}</div>
+            `;
+            
+            const icon = L.divIcon({
+                html: markerHtml,
+                className: '',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+            
+            const marker = L.marker([place.lat, place.lng], { icon });
+            
+            // Build popup content
+            let popupHtml = `
+                <div>
+                    <span class="category-tag" style="background: ${cat.color}">${cat.name}</span>
+                    <h4>${place.name}</h4>
+            `;
+            
+            if (place.rating) {
+                popupHtml += `<p class="rating">${'★'.repeat(place.rating)}${'☆'.repeat(5 - place.rating)}</p>`;
+            }
+            
+            if (place.description) {
+                popupHtml += `<p>${place.description}</p>`;
+            }
+            
+            if (place.notes) {
+                popupHtml += `<p><strong>Note:</strong> ${place.notes}</p>`;
+            }
+            
+            if (place.website) {
+                popupHtml += `<a href="${place.website}" target="_blank" class="link">Visit website →</a>`;
+            }
+            
+            popupHtml += `</div>`;
+            
+            marker.bindPopup(popupHtml);
+            
+            return marker;
+        }
+
+        // ============================================
+        // GPX HANDLING
+        // ============================================
+        
+        async function loadGpxFile(filepath) {
+            try {
+                const response = await fetch(filepath);
+                const gpxString = await response.text();
+                loadGpxString(gpxString);
+            } catch (error) {
+                console.warn('Could not load GPX file:', filepath);
+            }
+        }
+        
+        function loadGpxString(gpxString, name = 'Trail') {
+            const parser = new DOMParser();
+            const gpxDoc = parser.parseFromString(gpxString, 'text/xml');
+            
+            const trackPoints = gpxDoc.querySelectorAll('trkpt');
+            const coordinates = [];
+            
+            trackPoints.forEach(pt => {
+                const lat = parseFloat(pt.getAttribute('lat'));
+                const lng = parseFloat(pt.getAttribute('lon'));
+                coordinates.push([lat, lng]);
+            });
+            
+            if (coordinates.length > 0) {
+                const track = L.polyline(coordinates, {
+                    color: CATEGORIES.hiking.color,
+                    weight: 4,
+                    opacity: 0.8
+                });
+                
+                // Get track name from GPX if available
+                const nameEl = gpxDoc.querySelector('trk name, trk n');
+                const descEl = gpxDoc.querySelector('trk desc, metadata desc');
+                const trackName = nameEl ? nameEl.textContent : name;
+                const trackDesc = descEl ? descEl.textContent : '';
+                
+                let popupHtml = `<h4>🥾 ${trackName}</h4>`;
+                if (trackDesc) {
+                    popupHtml += `<p>${trackDesc}</p>`;
+                }
+                popupHtml += `<p style="color: #999; font-size: 11px;">${coordinates.length} track points</p>`;
+                
+                track.bindPopup(popupHtml);
+                track.addTo(layers.gpxTracks);
+            }
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        
+        function filterPlaces(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+            
+            allMarkers.forEach(marker => {
+                const place = marker.placeData;
+                const searchable = [
+                    place.name,
+                    place.description || '',
+                    place.notes || '',
+                    place.category
+                ].join(' ').toLowerCase();
+                
+                const matches = term === '' || searchable.includes(term);
+                const categoryEnabled = document.querySelector(`[data-category="${place.category}"]`).checked;
+                
+                if (matches && categoryEnabled) {
+                    if (!layers[place.category].hasLayer(marker)) {
+                        marker.addTo(layers[place.category]);
+                    }
+                } else {
+                    layers[place.category].removeLayer(marker);
+                }
+            });
+            
+            updatePlaceCount();
+        }
+
+        // ============================================
+        // UI HELPERS
+        // ============================================
+        
+        function updatePlaceCount() {
+            let visible = 0;
+            allMarkers.forEach(marker => {
+                const place = marker.placeData;
+                if (layers[place.category].hasLayer(marker)) {
+                    visible++;
+                }
+            });
+            document.getElementById('place-count').textContent = 
+                `Showing ${visible} of ${allPlaces.length} places`;
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        
+        function setupEventListeners() {
+            // Category toggles
+            document.querySelectorAll('[data-category]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const category = this.dataset.category;
+                    if (this.checked) {
+                        map.addLayer(layers[category]);
+                        if (category === 'hiking') {
+                            map.addLayer(layers.gpxTracks);
+                        }
+                    } else {
+                        map.removeLayer(layers[category]);
+                        if (category === 'hiking') {
+                            map.removeLayer(layers.gpxTracks);
+                        }
+                    }
+                    // Re-apply search filter
+                    filterPlaces(document.getElementById('search').value);
+                });
+            });
+            
+            // Search
+            document.getElementById('search').addEventListener('input', function() {
+                filterPlaces(this.value);
+            });
+            
+            // GPX file upload
+            document.getElementById('gpx-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        loadGpxString(event.target.result, file.name.replace('.gpx', ''));
+                    };
+                    reader.readAsText(file);
+                }
+            });
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>

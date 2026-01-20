@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "title": "My Zurich Map",
+    "center": [47.3769, 8.5417],
+    "zoom": 13
+  },
+
+  "places": [
+    
+    {
+      "name": "Hiltl",
+      "category": "restaurant",
+      "lat": 47.3727,
+      "lng": 8.5365,
+      "description": "World's oldest vegetarian restaurant. Great lunch buffet.",
+      "rating": 4,
+      "notes": "Try the Indian section of the buffet"
+    },
+    {
+      "name": "Zeughauskeller",
+      "category": "restaurant",
+      "lat": 47.3697,
+      "lng": 8.5394,
+      "description": "Traditional Swiss restaurant in historic armory building.",
+      "rating": 4,
+      "notes": "Good for groups, classic Zurich experience"
+    },
+    {
+      "name": "Café Sprüngli",
+      "category": "restaurant",
+      "lat": 47.3694,
+      "lng": 8.5390,
+      "description": "Famous for Luxemburgerli macarons and hot chocolate.",
+      "rating": 5,
+      "notes": "Must try the truffle pralines"
+    },
+
+    
+    {
+      "name": "Zürich HB",
+      "category": "transport",
+      "lat": 47.3779,
+      "lng": 8.5403,
+      "description": "Main train station. Connections to everywhere.",
+      "notes": "Good food hall in the basement"
+    },
+    {
+      "name": "Stadelhofen",
+      "category": "transport",
+      "lat": 47.3664,
+      "lng": 8.5484,
+      "description": "S-Bahn station near lake and old town.",
+      "notes": "Calatrava-designed architecture"
+    },
+    {
+      "name": "Bürkliplatz Ferry",
+      "category": "transport",
+      "lat": 47.3662,
+      "lng": 8.5412,
+      "description": "Lake ferry terminal. Great for day trips.",
+      "notes": "Take the boat to Rapperswil on sunny days"
+    },
+
+    
+    {
+      "name": "Migros Löwenstrasse",
+      "category": "grocery",
+      "lat": 47.3768,
+      "lng": 8.5367,
+      "description": "Large Migros near HB. Good prepared foods.",
+      "notes": "Cheap lunch option"
+    },
+    {
+      "name": "Coop Bellevue",
+      "category": "grocery",
+      "lat": 47.3665,
+      "lng": 8.5453,
+      "description": "Convenient location near the lake.",
+      "notes": "Good wine selection"
+    },
+
+    
+    {
+      "name": "Lindenhof",
+      "category": "activity",
+      "lat": 47.3731,
+      "lng": 8.5414,
+      "description": "Hilltop park with views over old town and river.",
+      "rating": 5,
+      "notes": "Great sunset spot, free"
+    },
+    {
+      "name": "Kunsthaus Zürich",
+      "category": "activity",
+      "lat": 47.3703,
+      "lng": 8.5485,
+      "description": "Major art museum. Monet, Picasso, Giacometti.",
+      "rating": 4,
+      "notes": "Free on Wednesdays"
+    },
+    {
+      "name": "Polyterrasse ETH",
+      "category": "activity",
+      "lat": 47.3765,
+      "lng": 8.5477,
+      "description": "Best viewpoint in the city. Take the Polybahn up.",
+      "rating": 5,
+      "notes": "The funicular is a fun experience"
+    },
+    {
+      "name": "Lake Swimming Tiefenbrunnen",
+      "category": "activity",
+      "lat": 47.3525,
+      "lng": 8.5568,
+      "description": "Public lake swimming area (Badi).",
+      "rating": 4,
+      "notes": "Summer only. Bring a picnic."
+    },
+
+    
+    {
+      "name": "Uetliberg Summit",
+      "category": "hiking",
+      "lat": 47.3493,
+      "lng": 8.4919,
+      "description": "Zurich's local mountain. Train goes to top.",
+      "rating": 5,
+      "notes": "Walk the ridge to Felsenegg, take cable car down",
+      "gpxFile": "uetliberg-ridge.gpx"
+    },
+    {
+      "name": "Käferberg Forest",
+      "category": "hiking",
+      "lat": 47.4027,
+      "lng": 8.5278,
+      "description": "Easy forest walks north of the city.",
+      "rating": 3,
+      "notes": "Good for a quick nature break"
+    }
+  ]
+}
